@@ -30,7 +30,7 @@ public class Client {
                 System.out.println("Menyval: ");
                 int menyVal = scan.nextInt();
                 switch(menyVal){
-                    case 1:getTempRapport();
+                    case 1: getTempRapport();
                         break;
                     case 2: getElRapport();
                         break;
@@ -126,19 +126,17 @@ public class Client {
     public static void setNewElectricityPrice(){
         String id = "A";
         System.out.println("Pris?");
-        float newprice = 0001f;
-        String el = service.path("rest")
-                .path("Service/elpris/update"+id).accept(MediaType.APPLICATION_XML).post(String.class, newprice);
+        Electricity elpris = new Electricity(0.44f);
+        ClientResponse el = service.path("rest")
+                .path("Service/elpris/update/"+id).accept(MediaType.APPLICATION_XML).post(ClientResponse.class, elpris);
         System.out.println(el);
     }
     
     public static void setNewTemperatur(){
         String id = "A";
-        System.out.println("Temp?");
-        Temperatur t = new Temperatur();
-        t.setTemp(25);
+        Kylsystem k = new Kylsystem(21,1);
         ClientResponse temp = service.path("rest")
-                .path("Service/temp/update"+id).accept(MediaType.APPLICATION_XML).post(ClientResponse.class, t);
+                .path("Service/temp/update/"+id).accept(MediaType.APPLICATION_XML).post(ClientResponse.class, k);
         System.out.println(temp);
     }
     
