@@ -1,6 +1,6 @@
 package servicepackage;
 
-import com.sun.jersey.api.client.ClientResponse;
+
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -18,22 +18,22 @@ public class Client {
             UriBuilder.fromUri("http://localhost:19566/webServiceServerhall").build());
 
     public static void main(String[] args) throws IOException{
-        
-        System.out.println("                 *** MENY ***");
-        System.out.println("[1] Temprapport                 [6] Senaste timmen");
-        System.out.println("[2] Elrapport                   [7] Sätt nytt elpris");
-        System.out.println("[3] Senaste temp                [8] Sätt ny temperatur i kylsystemet");
-        System.out.println("[4] Senaste förbrukning         [9] Kylsystems information");
-        System.out.println("[5] Elpris                      [10] Lägg till tekniker");
-        System.out.println("[11] Högst förbrukning");
 
-            
             while(true){
                 String id = "";
-                System.out.println("Menyval: ");
+                System.out.println("\n\n                 *** MENY ***\n");
+                System.out.println("[1] Temprapport                 [6] Senaste timmen");
+                System.out.println("[2] Elrapport                   [7] Ange nytt elpris");
+                System.out.println("[3] Senaste temperatur          [8] Ange ny temperatur i kylsystemet");
+                System.out.println("[4] Senaste elförbrukning       [9] Lägg till tekniker");
+                System.out.println("[5] Aktuellt Elpris             [10] Högst dagsförbrukning");
+                System.out.println("\n\nMenyval: ");
+                
+                
                 int menyVal = scan.nextInt();
+                
                 if(menyVal >= 1 && menyVal <= 9){
-                    System.out.println("Vilken serverhall vill du kolla på? (A, B, C)");
+                    System.out.println("Ange serverhall: (A, B, C)");
                     id = scan.next();
                 }
 
@@ -54,11 +54,9 @@ public class Client {
                         break;
                     case 8: setNewTemperatur(id);
                         break;
-                    case 9: kylsystemInfo(id);
+                    case 9: addTekniker();
                         break;
-                    case 10: addTekniker();
-                        break;
-                    case 11: getHighestConsumption();
+                    case 10: getHighestConsumption();
                         break;
                     default: System.out.println("Felaktigt val");
                         break; 
@@ -85,8 +83,7 @@ public class Client {
         System.out.println("Medel: " + maxMinAverageTemp.getAverageTemp() +"\n"+ "Högsta temperatur: " + maxMinAverageTemp.getMaxTemp() +"\n"+ "Lägsta temperatur: " + maxMinAverageTemp.getMinTemp());
     }
     
-    
-    
+
     public static void getElRapport(String serverhall){
         String id = serverhall;
         System.out.println("Vilken månad?");
@@ -114,13 +111,19 @@ public class Client {
         System.out.println("Billigast timme: " + billigastDyrastTimme.getBilligastTid());
     }
     
-    
-    
+
     public static void getTemperatur(String serverhall){
         String id = serverhall;
         Temperatur temp = service.path("rest")
         .path("Service/tempNow/"+id).accept(MediaType.APPLICATION_XML).get(Temperatur.class);
+        
+        Kylsystem k = service.path("rest")
+        .path("Service/kylsysteminfo/"+id).accept(MediaType.APPLICATION_XML).get(Kylsystem.class);
+        
         System.out.println("Senaste temperatur: "+temp.getTemp() + " Datum: "+ temp.getOurTimeZone(temp.getDate()));
+        System.out.println("Givare är satt till: " + k.getTemp());
+        System.out.println("Av: "+ k.getTeknikerNamn() + " Datum: "+k.getOurTimeZone(k.getDate()));
+        
     }
     
     public static void getElectricity(String serverhall){
@@ -148,9 +151,9 @@ public class Client {
         System.out.println("Pris?");
         float d = scan.nextFloat();
         Electricity elpris = new Electricity(d);
-        ClientResponse el = service.path("rest")
-                .path("Service/elpris/update/"+id).accept(MediaType.APPLICATION_XML).post(ClientResponse.class, elpris);
-        System.out.println(el);
+        Response res = service.path("rest")
+                .path("Service/elpris/update/"+id).accept(MediaType.APPLICATION_XML).post(Response.class, elpris);
+        System.out.println(res.getMessage());
     }
     
     public static void setNewTemperatur(String serverhall){
@@ -160,27 +163,19 @@ public class Client {
         System.out.println("Ange ny temperatur till systemet: ");
         int nyTemp = scan.nextInt();
         Kylsystem k = new Kylsystem(nyTemp, teknikerId);
-        ClientResponse temp = service.path("rest")
-                .path("Service/temp/update/"+id).accept(MediaType.APPLICATION_XML).post(ClientResponse.class, k);
-        System.out.println(temp);
+        Response temp = service.path("rest")
+                .path("Service/temp/update/"+id).accept(MediaType.APPLICATION_XML).post(Response.class, k);
+        System.out.println(temp.getMessage());
     }
     
-    public static void kylsystemInfo(String serverhall){
-        String id = serverhall;
-        Kylsystem k = service.path("rest")
-        .path("Service/kylsysteminfo/"+id).accept(MediaType.APPLICATION_XML).get(Kylsystem.class);
-        System.out.println("Temperaturen är satt till: " + k.getTemp());
-        System.out.println("Av: "+ k.getTeknikerNamn());
-    }
-    
-    
+
     public static void addTekniker(){
         System.out.println("Namn:");
         String namn = scan.next();
         Tekniker t = new Tekniker(namn);
-        ClientResponse temp = service.path("rest")
-                .path("Service/tekniker/add").accept(MediaType.APPLICATION_XML).post(ClientResponse.class, t);
-        System.out.println(temp);
+        Response temp = service.path("rest")
+                .path("Service/tekniker/add").accept(MediaType.APPLICATION_XML).post(Response.class, t);
+        System.out.println(temp.getMessage());
     }
     
     public static void getHighestConsumption(){
@@ -190,7 +185,6 @@ public class Client {
         int day = scan.nextInt();
         Electricity el = service.path("rest")
         .path("Service/highestconsumption"+month+"/day/"+day).accept(MediaType.APPLICATION_XML).get(Electricity.class);
-        System.out.println("Serverhall med högst energiförbrukning: " + el.getServerhallsnamn() + " - " + el.getEl()+"kw");
+        System.out.println("Serverhall med högst energiförbrukning: " + el.getServerhallsNamn() + " - " + el.getEl()+"kw");
     }
-
 }
