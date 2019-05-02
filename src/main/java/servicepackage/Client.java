@@ -5,11 +5,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
 import java.util.Scanner;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
@@ -84,7 +79,8 @@ public class Client {
         .path("Service/temp/"+id+"/month/"+month+"/day/"+day).accept(MediaType.APPLICATION_XML).get(Temperatur[].class);
         
         for(Temperatur t : tempArray){
-            System.out.println("Temp: " + t.getTemp() + "Datum: " +t.getDate());
+
+            System.out.println("Temp: " + t.getTemp() + " Datum: "+t.getOurTimeZone(t.getDate()));
         }
         System.out.println("Medel: " + maxMinAverageTemp.getAverageTemp() +"\n"+ "Högsta temperatur: " + maxMinAverageTemp.getMaxTemp() +"\n"+ "Lägsta temperatur: " + maxMinAverageTemp.getMinTemp());
     }
@@ -110,7 +106,7 @@ public class Client {
         .path("Service/billigastDyrastTimme/"+id).accept(MediaType.APPLICATION_XML).get(Electricity.class);
         
         for(Electricity e : tempArray){
-            System.out.println("Datum: " +e.getDate() + "Elförbrukning: " + e.getEl()+"Elkostnad: "+e.getEl()*elpris.getElKostnad());
+            System.out.println("Datum: " +e.getOurTimeZone(e.getDate()) + "Elförbrukning: " + e.getEl()+"Elkostnad: "+e.getEl()*elpris.getElKostnad());
         }
         
         System.out.println("Medelförbrukning: " + maxMinAverageEl.getAverageEl() +"\n"+ "Högsta elförbrukning: " + maxMinAverageEl.getMaxEl() +"\n"+ "Lägsta elförbrukning: " + maxMinAverageEl.getMinEl() +"\n" +"Högsta kostnad: "+ elpris.getElKostnad());
@@ -124,21 +120,21 @@ public class Client {
         String id = serverhall;
         Temperatur temp = service.path("rest")
         .path("Service/tempNow/"+id).accept(MediaType.APPLICATION_XML).get(Temperatur.class);
-        System.out.println("Senaste temperatur: "+temp.getTemp() + "Datum: "+ temp.getDate());
+        System.out.println("Senaste temperatur: "+temp.getTemp() + " Datum: "+ temp.getOurTimeZone(temp.getDate()));
     }
     
     public static void getElectricity(String serverhall){
         String id = serverhall;
         Electricity el = service.path("rest")
         .path("Service/elNow/"+id).accept(MediaType.APPLICATION_XML).get(Electricity.class);
-        System.out.println("Senaste förbrukning: "+el.getEl() + "Datum: "+ el.getDate());
+        System.out.println("Senaste förbrukning: "+el.getEl() + "Datum: "+ el.getOurTimeZone(el.getDate()));
     }
     
     public static void getElectricityPrice(String serverhall){
         String id = serverhall;
         Electricity el = service.path("rest")
         .path("Service/elpris/"+id).accept(MediaType.APPLICATION_XML).get(Electricity.class);
-        System.out.println("Senaste elpris: "+el.getElKostnad() + "Datum: "+ el.getDate());
+        System.out.println("Senaste elpris: "+el.getElKostnad() + "Datum: "+ el.getOurTimeZone(el.getDate()));
     }
     
     public static void getInfoLatestHour(String serverhall){
@@ -150,7 +146,8 @@ public class Client {
     public static void setNewElectricityPrice(String serverhall){
         String id = serverhall;
         System.out.println("Pris?");
-        Electricity elpris = new Electricity(0.44f);
+        float d = scan.nextFloat();
+        Electricity elpris = new Electricity(d);
         ClientResponse el = service.path("rest")
                 .path("Service/elpris/update/"+id).accept(MediaType.APPLICATION_XML).post(ClientResponse.class, elpris);
         System.out.println(el);
@@ -193,7 +190,7 @@ public class Client {
         int day = scan.nextInt();
         Electricity el = service.path("rest")
         .path("Service/highestconsumption"+month+"/day/"+day).accept(MediaType.APPLICATION_XML).get(Electricity.class);
-        System.out.println("Serverhall med högst förbrukning: " + el.getServerhallsnamn() + " - " + el.getEl()+"kw");
+        System.out.println("Serverhall med högst energiförbrukning: " + el.getServerhallsnamn() + " - " + el.getEl()+"kw");
     }
 
 }
