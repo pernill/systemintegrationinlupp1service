@@ -78,7 +78,7 @@ public class Client {
         
         for(Temperatur t : tempArray){
 
-            System.out.println("Temp: " + t.getTemp() + " Datum: "+t.getOurTimeZone(t.getDate()));
+            System.out.println("Temp: " + t.getTemp() + "  Datum: "+t.getOurTimeZone(t.getDate()));
         }
         System.out.println("Medel: " + maxMinAverageTemp.getAverageTemp() +"\n"+ "Högsta temperatur: " + maxMinAverageTemp.getMaxTemp() +"\n"+ "Lägsta temperatur: " + maxMinAverageTemp.getMinTemp());
     }
@@ -103,10 +103,10 @@ public class Client {
         .path("Service/billigastDyrastTimme/"+id).accept(MediaType.APPLICATION_XML).get(Electricity.class);
         
         for(Electricity e : tempArray){
-            System.out.println("Datum: " +e.getOurTimeZone(e.getDate()) + "Elförbrukning: " + e.getEl()+"Elkostnad: "+e.getEl()*elpris.getElKostnad());
+            System.out.println("Datum: " +e.getOurTimeZone(e.getDate()) + "  Elförbrukning: " + e.getEl()+"  Elkostnad i kr: "+e.getEl()*elpris.getElKostnad()+"kr");
         }
         
-        System.out.println("Medelförbrukning: " + maxMinAverageEl.getAverageEl() +"\n"+ "Högsta elförbrukning: " + maxMinAverageEl.getMaxEl() +"\n"+ "Lägsta elförbrukning: " + maxMinAverageEl.getMinEl() +"\n" +"Högsta kostnad: "+ elpris.getElKostnad());
+        System.out.println("Medelförbrukning: " + maxMinAverageEl.getAverageEl() +"\n"+ " Högsta elförbrukning: " + maxMinAverageEl.getMaxEl() +"\n"+ "Lägsta elförbrukning: " + maxMinAverageEl.getMinEl() +"\n" +"Högsta kostnad: "+ elpris.getElKostnad()*maxMinAverageEl.getMaxEl()+"kr");
         System.out.println("Dyrast timme: " + billigastDyrastTimme.getDyrastTid());
         System.out.println("Billigast timme: " + billigastDyrastTimme.getBilligastTid());
     }
@@ -178,6 +178,7 @@ public class Client {
         System.out.println(temp.getMessage());
     }
     
+    
     public static void getHighestConsumption(){
         System.out.println("Vilken månad?");
         int month = scan.nextInt();
@@ -187,4 +188,5 @@ public class Client {
         .path("Service/highestconsumption"+month+"/day/"+day).accept(MediaType.APPLICATION_XML).get(Electricity.class);
         System.out.println("Serverhall med högst energiförbrukning: " + el.getServerhallsNamn() + " - " + el.getEl()+"kw");
     }
+
 }
